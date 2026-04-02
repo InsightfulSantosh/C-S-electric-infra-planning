@@ -12,7 +12,7 @@ The objective is not to replace ERP, WMS, or existing planning systems. The obje
 - optimize production and allocation decisions
 - provide local, private, open-weight AI assistance for planners and management
 
-This design is based on the current ForgeBoard planning engine and extends it into a scalable enterprise architecture suitable for a large factory network.
+This design is based on the current ForgeBoard planning engine and extends it into a scalable enterprise architecture suitable for a multi-factory industrial network.
 
 ---
 
@@ -20,14 +20,14 @@ This design is based on the current ForgeBoard planning engine and extends it in
 
 C&S Electric scale assumptions provided for this proposal:
 
-- more than `20` factories
-- more than `50` warehouses
+- around `9` factories
+- around `15-20` warehouses
 - average daily sales orders around `20,000`
 - around `200,000` finished goods and related BOM structures
 - private hosting requirement
 - preference for locally downloaded open-weight models instead of closed-source hosted APIs
 
-This scale changes the architecture significantly.
+This scale still requires an enterprise architecture, but it allows a more focused production sizing than the earlier larger-network assumption.
 
 The correct design is:
 
@@ -475,7 +475,7 @@ The LLM should receive:
 |---|---|---:|---:|---|---:|---|
 | minimal workable | controlled pilot, low concurrency, internal evaluation | `16-24 cores` | `128 GB` | `1 x 48 GB GPU` | `1-2 TB NVMe` | `Qwen3-14B`, quantized `Mistral-Small-24B` |
 | good / recommended | real production pilot, multiple planners, stable daily use | `32 cores` | `256 GB` | `2 x 48 GB GPU` or `1 x 80 GB GPU` | `2 TB NVMe` | `Qwen3-32B`, `Mistral-Small-24B`, optional secondary model |
-| best / enterprise | high concurrency, multi-site usage, routed multi-model architecture | `48-64 cores` | `512 GB` | `2 x 80 GB GPU` or `4 x 48 GB GPU` | `4 TB NVMe` | `Qwen3-32B` plus secondary reasoning or specialist models |
+| best / enterprise | high concurrency, future network expansion, routed multi-model architecture | `48-64 cores` | `512 GB` | `2 x 80 GB GPU` or `4 x 48 GB GPU` | `4 TB NVMe` | `Qwen3-32B` plus secondary reasoning or specialist models |
 
 Important sizing rule:
 
@@ -610,13 +610,21 @@ This avoids mixing:
 |---|---:|---|---|
 | minimal workable | `1` | `16-24 CPU cores`, `128 GB RAM`, `1-2 TB NVMe`, `1 x 48 GB GPU` | controlled pilot and low-concurrency local LLM usage |
 | good / recommended | `2` | `32 CPU cores`, `256 GB RAM`, `2 TB NVMe`, `2 x 48 GB GPU` or `1 x 80 GB GPU` | production pilot and multi-user planner assistance |
-| best / enterprise | `2-4` | `48-64 CPU cores`, `512 GB RAM`, `4 TB NVMe`, `2 x 80 GB GPU` or `4 x 48 GB GPU` | high-concurrency, multi-site enterprise inference |
+| best / enterprise | `2-4` | `48-64 CPU cores`, `512 GB RAM`, `4 TB NVMe`, `2 x 80 GB GPU` or `4 x 48 GB GPU` | high-concurrency enterprise inference with future expansion headroom |
 
 ### Recommended GPU choices
 
 - `RTX 6000 Ada 48GB`
 - `L40S 48GB`
 - `H100 80GB` or similar enterprise accelerator for higher-end configurations
+
+### Default recommendation for this client
+
+For the corrected client scale of around `9` factories and `15-20` warehouses:
+
+- `good / recommended` should be treated as the default production target
+- `minimal workable` is suitable only for a controlled pilot
+- `best / enterprise` should be treated as optional future expansion headroom, not the baseline
 
 ### Why two LLM servers
 
@@ -924,6 +932,8 @@ Important note:
 
 ### Option C: Best Enterprise Hardware BOM
 
+This option should be positioned as future expansion capacity, not the default recommendation for the current corrected client scale.
+
 | Item | Qty | Suggested Specification | Purpose | Unit Cost | Total Cost |
 |---|---:|---|---|---|---|
 | app server | `2-4` | `16-32 vCPU`, `64-128 GB RAM`, `1 TB NVMe` | high-availability application services | `TBD` | `TBD` |
@@ -974,6 +984,8 @@ You can say:
 If the client wants the most practical first step, recommend this:
 
 ### Recommended Phase-1-to-Phase-3 foundation
+
+Default recommendation for this client: adopt `Option B: Recommended Production Hardware BOM` as the target architecture, and treat `Option C` only as future expansion if usage, concurrency, or enterprise scope increases materially.
 
 - deterministic planning engine based on ForgeBoard
 - enterprise data store
